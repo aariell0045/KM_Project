@@ -4,24 +4,13 @@ from flask import Flask, request, jsonify, send_file
 from datetime import datetime
 
 app = Flask(__name__)
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-CSV_FILE = "previous_kilometer_data.csv"
+UPLOAD_FOLDER = "/tmp"
+CSV_FILE = "/tmp/previous_kilometer_data.csv"
 
 def get_report_filename():
     """ Generate a filename for the report with the current date """
     date_str = datetime.now().strftime("%Y-%m-%d")
-    return f"km_deviation_report_{date_str}.csv"
-
-def clear_upload_folder():
-    """ Delete all files in the upload folder before a new upload """
-    for filename in os.listdir(UPLOAD_FOLDER):
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-        except Exception as e:
-            print(f"Error deleting file {file_path}: {e}")
+    return f"/tmp/km_deviation_report_{date_str}.csv"
 
 def load_previous_data():
     """ Load previous data if available, otherwise initialize empty """
@@ -68,6 +57,14 @@ def update_kilometer_status(excel_path):
         "8 נוסעים": 15000,
         "14 נוסעים": 40000,
         "19 נוסעים": 40000,
+        "מונית 4 נוסעים": 15000,
+        "20 נוסעים": 40000,
+        "תא כפול סגור טנדר": 10000,
+        "7 נוסעים": 25000,
+        "תא כפול משאית": 40000,
+        "13 נוסעים": 40000,
+        "תא כפול פתוח טנדר": 10000,
+        "10 נוסעים": 40000
     }
     
     # Compare data
@@ -96,8 +93,6 @@ def update_kilometer_status(excel_path):
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
-    clear_upload_folder()  # Delete previous files before uploading a new one
-    
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
     
