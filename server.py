@@ -5,8 +5,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# 🔹 Change file path from /tmp/ to /var/task/ (Persistent across cold starts)
-CSV_FILE = "/var/task/previous_kilometer_data.csv"
+# ✅ Store `previous_kilometer_data.csv` in /tmp/ since it's writable
+CSV_FILE = "/tmp/previous_kilometer_data.csv"
 UPLOAD_FOLDER = "/tmp"
 
 def get_report_filename():
@@ -21,16 +21,16 @@ def load_previous_data():
     return pd.DataFrame(columns=["קבוצה", "רישוי", "קילומטרז'", "חריגה"])
 
 def save_previous_data(df):
-    """ Save the previous data persistently in /var/task/ """
+    """ ✅ Save previous data to /tmp/ (Vercel allows writing here) """
     df.to_csv(CSV_FILE, index=False, encoding="utf-8-sig")
 
 def cleanup_old_files():
     """ Deletes old uploaded and report files but keeps previous_kilometer_data.csv """
     try:
-        # Delete uploaded files except previous_kilometer_data.csv
+        # Delete uploaded files
         for file in os.listdir(UPLOAD_FOLDER):
             file_path = os.path.join(UPLOAD_FOLDER, file)
-            if os.path.isfile(file_path):
+            if os.path.isfile(file_path) and file != "previous_kilometer_data.csv":
                 os.remove(file_path)
                 print(f"🗑 Deleted old file: {file_path}")
     except Exception as e:
@@ -70,7 +70,7 @@ def update_kilometer_status(excel_path):
 
     if previous_data.empty:
         df["חריגה"] = 0
-        save_previous_data(df)  # ✅ Save to persistent location
+        save_previous_data(df)  # ✅ Save to persistent location in /tmp/
         print("✅ No previous data, initialized to 0.")
         return df.to_dict(orient="records"), get_report_filename()
 
@@ -111,7 +111,7 @@ def update_kilometer_status(excel_path):
     if "חריגה" in merged.columns and all(merged["חריגה"] == "תקין"):
         print("✅ All data is OK, not updating previous records.")
     else:
-        save_previous_data(df)  # ✅ Save to persistent location
+        save_previous_data(df)  # ✅ Save to /tmp/
         print("⚠️ Deviations found - previous records updated!")
 
     return merged.to_dict(orient="records"), report_filename
