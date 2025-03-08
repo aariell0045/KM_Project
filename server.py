@@ -34,7 +34,7 @@ def update_kilometer_status(excel_path):
     kilometer_col = next((col for col in df.columns if "קילומטרז" in col), None)
     if not kilometer_col:
         print("❌ Error: Mileage column not found!")
-        return {"error": "Mileage column not found"}
+        return {"error": "Mileage column not found"}, None  # Ensuring two return values
     
     df = df[['קבוצה', 'רישוי', kilometer_col]].dropna()
     df.rename(columns={kilometer_col: "קילומטרז'"}, inplace=True)
@@ -48,7 +48,7 @@ def update_kilometer_status(excel_path):
         df["חריגה"] = 0
         df.to_csv(CSV_FILE, index=False)
         print("✅ No previous data, initialized to 0.")
-        return df.to_dict(orient="records")
+        return df.to_dict(orient="records"), get_report_filename()  # Ensuring two return values
     
     # Define deviation thresholds
     thresholds = {
@@ -89,7 +89,7 @@ def update_kilometer_status(excel_path):
         df.to_csv(CSV_FILE, index=False, encoding="utf-8-sig")
         print("⚠️ Deviations found - previous records updated!")
     
-    return merged.to_dict(orient="records"), report_filename
+    return merged.to_dict(orient="records"), report_filename  # Ensuring two return values
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
