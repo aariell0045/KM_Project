@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>העלאת קובץ Excel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+        h2 {
+            color: #333;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        button {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        pre {
+            text-align: left;
+            background: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>העלאת קובץ Excel</h2>
+        <input type="file" id="fileInput" accept=".xlsx">
+        <button onclick="uploadFile()">📤 העלה</button>
+        <p id="status"></p>
+        <pre id="result"></pre>
+        <button onclick="downloadReport()">📥 הורד דוח חריגות</button>
+    </div>
+
+    <script>
+        const BASE_URL = "https://your-vercel-app-url.vercel.app";
+
+        function uploadFile() {
+            const fileInput = document.getElementById("fileInput");
+            const status = document.getElementById("status");
+            const result = document.getElementById("result");
+            
+            if (!fileInput.files.length) {
+                status.innerText = "❌ אנא בחר קובץ";
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            
+            status.innerText = "🔄 מעלה...";
+            result.innerText = "";
+            
+            fetch(`${BASE_URL}/upload`, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                status.innerText = "✅ העלאה הושלמה!";
+                result.innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                status.innerText = "⚠️ שגיאה בהעלאה";
+                result.innerText = error;
+            });
+        }
+
+        function downloadReport() {
+            window.location.href = `${BASE_URL}/download_report`;
+        }
+    </script>
+</body>
+</html>

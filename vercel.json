@@ -1,0 +1,13 @@
+{
+    "version": 2,
+    "builds": [
+      { "src": "server.py", "use": "@vercel/python" },
+      { "src": "public/index.html", "use": "@vercel/static" }
+    ],
+    "routes": [
+      { "src": "/upload", "dest": "server.py" },
+      { "src": "/download_report", "dest": "server.py" },
+      { "src": "/(.*)", "dest": "/public/index.html" }
+    ]
+  }
+  
